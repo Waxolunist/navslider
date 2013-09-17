@@ -25,7 +25,7 @@
     <div id="app">
       <div id="content">
         Some Content
-        <a href="/swipe.html">Swipe</a>
+        <a href="/index.html">Touch</a>
       </div>
     </div>
     <script src="http://localhost:35729/livereload.js"></script>
@@ -33,11 +33,10 @@
     <script type="text/javascript">
       $$(window).on('load', function () {
           var config = {
-            width: 80,
-            time: 200,
-            threshold: 0.5,
+            width: 70,
+            time: 300,
             appId: 'app',
-            strategy: 'touch'
+            strategy: 'swipe'
           };
           navSlide.init(config);
       });

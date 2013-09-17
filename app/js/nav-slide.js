@@ -16,7 +16,7 @@ var navSlide = {
       if(navSlide.state.multipleNavs) {
         navSlide.state.rightNav.style('z-index', '0');
       }
-      navSlide.state.appDiv.vendor('transform', 'translateX(' + navSlide.config.width + ')');
+      navSlide.state.appDiv.vendor('transform', 'translateX(' + navSlide.config.width + '%)');
     }
   },
 
@@ -26,12 +26,92 @@ var navSlide = {
       if(navSlide.state.multipleNavs) {
         navSlide.state.rightNav.style('z-index', '2');
       }
-      navSlide.state.appDiv.vendor('transform', 'translateX(-' + navSlide.config.width + ')');
+      navSlide.state.appDiv.vendor('transform', 'translateX(-' + navSlide.config.width + '%)');
+    }
+  },
+
+  moveLeftMenu: function(e) {
+    if(!(e instanceof TouchEvent)) {
+      return;
+    }
+    //if both are closed
+    if(!navSlide.state.rightOpen && !navSlide.state.movingRight) {
+      var currentX = e.changedTouches[0].clientX;
+      if(navSlide.state.startX < currentX) {
+        //Touch goes to the right
+        navSlide.state.movingLeft = true;
+        navSlide.state.movingRight = false;
+        var distance = currentX - navSlide.state.startX;
+        //if(window.innerWidth * navSlide.config.width / 100 - 10 < distance) {
+        //  navSlide.showLeftMenu();
+        //} else {
+          navSlide.state.appDiv.vendor('transform', 'translateX(' + distance + 'px)');
+        //}
+      }
+    }
+  },
+
+  moveRightMenu: function(e) {
+    if(!(e instanceof TouchEvent)) {
+      return;
+    }
+    //if both are closed
+    if(!navSlide.state.leftOpen && !navSlide.state.movingLeft) {
+      var currentX = e.changedTouches[0].clientX;
+      if(navSlide.state.startX > currentX) {
+        //Touch goes to the left
+        navSlide.state.movingRight = true;
+        navSlide.state.movingLeft = false;
+        var distance = navSlide.state.startX - currentX;
+        //if(window.innerWidth * navSlide.config.width / 100 - 10 < distance) {
+        //  navSlide.showRightMenu();
+        //} else {
+          navSlide.state.appDiv.vendor('transform', 'translateX(-' + distance + 'px)');
+        //}
+      }
+    }
+  },
+
+  resetMoveLeftMenu: function(e) {
+    if(!(e instanceof TouchEvent)) {
+      return;
+    }
+    //if both are closed
+    if(!navSlide.state.rightOpen && !navSlide.state.movingRight && navSlide.state.movingLeft) {
+      var currentX = e.changedTouches[0].clientX;
+      //Touch goes to the left
+      var distance = navSlide.state.startX - currentX;
+      if(window.innerWidth * navSlide.config.width / 100 * navSlide.config.threshold < distance) {
+        navSlide.showLeftMenu();
+      } else {
+        navSlide.closeLeftMenu();
+      }
+      navSlide.state.movingLeft = false;
+      navSlide.state.movingRight = false;
+    }
+  },
+
+  resetMoveRightMenu: function(e) {
+    if(!(e instanceof TouchEvent)) {
+      return;
+    }
+    //if both are closed
+    if(!navSlide.state.leftOpen && !navSlide.state.movingLeft && navSlide.state.movingRight) {
+      var currentX = e.changedTouches[0].clientX;
+      //Touch goes to the left
+      var distance = navSlide.state.startX - currentX;
+      if(window.innerWidth * navSlide.config.width / 100 * navSlide.config.threshold < distance) {
+        navSlide.showRightMenu();
+      } else {
+        navSlide.closeRightMenu();
+      }
+      navSlide.state.movingLeft = false;
+      navSlide.state.movingRight = false;
     }
   },
 
   closeLeftMenu: function() {
-    if(navSlide.state.leftOpen && !navSlide.state.rightOpen) {
+    if((navSlide.state.leftOpen && !navSlide.state.rightOpen) || navSlide.state.movingLeft )  {
       navSlide.state.appDiv.vendor('transform', 'translateX(0)');
       if(navSlide.state.multipleNavs) {
         setTimeout(function () { 
@@ -44,7 +124,7 @@ var navSlide = {
   },
 
   closeRightMenu: function() {
-    if(navSlide.state.rightOpen && !navSlide.state.leftOpen) {
+    if((navSlide.state.rightOpen && !navSlide.state.leftOpen) || navSlide.state.movingRight) {
       navSlide.state.appDiv.vendor('transform', 'translateX(0)');
       if(navSlide.state.multipleNavs) {
         setTimeout(function() {
@@ -59,6 +139,9 @@ var navSlide = {
   },
 
   prepareMovement: function(e) {
+    if(!(e instanceof TouchEvent)) {
+      return;
+    }
     //if both are closed
     if(!navSlide.state.rightOpen && !navSlide.state.leftOpen) {
       var currentX = e.changedTouches[0].clientX;
@@ -73,28 +156,54 @@ var navSlide = {
   },
 
   prepareMovementStart: function(e) {
+    if(!(e instanceof TouchEvent)) {
+      return;
+    }
     navSlide.state.lastX = e.changedTouches[0].clientX;
+    navSlide.state.startX = e.changedTouches[0].clientX;
   },
 
   //init methods
   initEvents: function() {
     if($$('.nav-slide-right').length == 1) {
-      if(navSlide.state.multipleNavs) {
-        document.body.addEventListener('touchmove', navSlide.prepareMovement);
-        document.body.addEventListener('touchstart', navSlide.prepareMovementStart);
+      if(this.state.multipleNavs) {
+        $$('body').on('touchmove', this.prepareMovement);
+        $$('body').on('touchstart', this.prepareMovementStart);
       }
-      $$('body').swipeLeft(this.showRightMenu);
-      $$('body').swipeRight(this.closeRightMenu);
+      if(this.config.strategy == 'swipe') {
+        $$('body').swipeLeft(this.showRightMenu);
+        $$('body').swipeRight(this.closeRightMenu);
+      } else if (this.config.strategy == 'touch') {
+        $$('body').on('touchmove', this.moveRightMenu);
+        $$('body').on('touchend', this.resetMoveRightMenu);
+        navSlide.state.movingRight = false;
+        //Register only if not already registered
+        if(!this.state.multipleNavs) {
+          $$('body').on('touchstart', this.prepareMovementStart);
+        }
+      }
+      this.state.rightOpen = false;
     }
 
     if($$('.nav-slide-left').length == 1) {
-      $$('body').swipeRight(this.showLeftMenu);
-      $$('body').swipeLeft(this.closeLeftMenu);
+      if(this.config.strategy == 'swipe') {
+        $$('body').swipeRight(this.showLeftMenu);
+        $$('body').swipeLeft(this.closeLeftMenu);
+      } else if (this.config.strategy == 'touch') {
+        $$('body').on('touchmove', this.moveLeftMenu);
+        $$('body').on('touchend', this.resetMoveLeftMenu);
+        this.state.movingLeft = false;
+        //Register only if not already registered
+        if(!this.state.multipleNavs) {
+          $$('body').on('touchstart', this.prepareMovementStart);
+        }
+      }
+      this.state.leftOpen = false;
     }
   },
 
   initStyles: function() {
-    $$('.nav-slide').style('width', this.config.width);
+    $$('.nav-slide').style('width', this.config.width + '%');
     this.state.appDiv.vendor('transition-duration', this.config.time + 'ms');
   },
 
@@ -109,12 +218,3 @@ var navSlide = {
     this.initEvents();
   }
 };
-
-$$(window).on('load', function () {
-  var config = {
-    width: '70%',
-    time: 300,
-    appId: 'app'
-  };
-  navSlide.init(config);
-});
