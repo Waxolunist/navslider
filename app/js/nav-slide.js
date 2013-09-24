@@ -9,6 +9,7 @@ var navSlide = {
     
   },
 
+  /*
   //Event methods
   showLeftMenu: function() {
     if(!navSlide.state.leftOpen && !navSlide.state.rightOpen) {
@@ -201,10 +202,52 @@ var navSlide = {
       this.state.leftOpen = false;
     }
   },
-
+  */
+  
   initStyles: function() {
     $$('.nav-slide').style('width', this.config.width + '%');
     this.state.appDiv.vendor('transition-duration', this.config.time + 'ms');
+  },
+
+  initFSM: function() {
+    //when using strategy swipe 3 states exist
+    //open, close, prepared
+    //when using strategy touch a fourth state moving is added
+
+
+    var fsm = Statemachin.create({
+      initial: { state: 'closed', event: 'init', defer: true },
+      events: [
+        { name: 'prepare',  from: ['closed', 'prepared'], to: 'prepared' },
+        { name: 'move',     from: ['prepared', 'moving'], to: 'moving' },
+        { name: 'open',     from: ['prepared', 'moving'], to: 'opened' },
+        { name: 'close',    from: ['opened', 'moving'],   to: 'closed' }
+      ],
+      callbacks: [
+        //states
+        onclosed: function(event, from, to) { navSlide.unprepareNav(); },
+        onprepared: function(event, from, to, el) { navSlide.state.currentEl = el; navSlide.prepareNav(el); },
+        //events
+        onmove: function(event, from, to, d) { navSlide.move(d); },
+        //startup
+        oninit: function(event, from, to, config) {
+         $$('.nav-slide').style('width', navSlide.config.width + '%');
+ 
+        },
+      ]
+    });
+  },
+
+  unprepareNav: function() {
+    $$('.nav-slide').style('z-index', '1');
+  },
+
+  prepareNav: function(el) {
+    el.style('z-index', '2');
+  },
+
+  move: function(d) {
+    navSlide.state.appDiv.vendor('transform', 'translateX(-' + distance + 'px)');
   },
 
   init: function(config) {

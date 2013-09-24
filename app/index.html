@@ -10,37 +10,42 @@
     <title>Slidemenu</title>
 
     <link rel="stylesheet" type="text/css" href="styles/main.css">
-
-    <script src="components/quojs/quo.js" type="text/javascript"></script>
   </head>
 
   <body>
-    <nav class="nav-slide nav-slide-left">
-      Left menu
-    </nav>
-    <nav class="nav-slide nav-slide-right">
-      Right menu
-    </nav>
-
     <div id="app">
       <div id="content">
-        Some Content
-        <a href="/swipe.html">Swipe</a>
+        <h1>Configure slidemenus:</h1>
+        <section>
+          <div data-role="fieldcontain">
+            <label for="strategy">Strategy:</label>
+            <select name="strategy" id="strategy" data-role="slider" data-mini="true">
+              <option value="touch">Touch</option>
+              <option value="swipe">Swipe</option>
+            </select>
+          </div>
+        </section>
+        <section>
+          <div data-role="fieldcontain">
+            <label for="leftnav">Left:</label>
+            <select name="leftnav" id="leftnav" data-role="slider" data-mini="true">
+              <option value="off">Off</option>
+              <option value="on" selected="selected">On</option>
+            </select>
+          </div>
+        </section>
+        <section>
+          <div data-role="fieldcontain">
+            <label for="rightnav">Right:</label>
+            <select name="rightnav" id="rightnav" data-role="slider" data-mini="true">
+              <option value="off">Off</option>
+              <option value="on" selected="selected">On</option>
+            </select>
+          </div>
+        </section>
       </div>
     </div>
     <script src="http://localhost:35729/livereload.js"></script>
-    <script src="js/nav-slide.js" type="text/javascript"></script>
-    <script type="text/javascript">
-      $$(window).on('load', function () {
-          var config = {
-            width: 80,
-            time: 200,
-            threshold: 0.5,
-            appId: 'app',
-            strategy: 'touch'
-          };
-          navSlide.init(config);
-      });
-    </script>
+    <script data-main="js/main" src="components/requirejs/require.js"></script>
   </body>
 </html>
