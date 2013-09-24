@@ -52,12 +52,12 @@ define(['jquery', 'jquery-mobile', 'underscore', 'javascript-state-machine'], fu
       };
 
       var resetTransform = function(event, from, to) {
-        console.log(fsm.current);
+        console.log('resetTransform: ' + fsm.current);
         $(config.appSelector).css('transform', 'translateX(0)');
       };
   
       var resetZIndex = function(event, from, to) {
-        console.log(fsm.current);
+        console.log('resetZIndex: ' + fsm.current);
         $('.' + config.navClass).css('z-index', 1);
       };
 
@@ -89,23 +89,37 @@ define(['jquery', 'jquery-mobile', 'underscore', 'javascript-state-machine'], fu
       var moveNav = function(event, from, to, e) {
         console.log('moveNav: ' + fsm.current + ' - ' + e.type);
         var x = _getX(e);
+        if(_.isUndefined(tmp.startX)) { 
+          tmp.startX = x; 
+        }
+        if(_.isUndefined(tmp.lastX)) { 
+          tmp.lastX = x; 
+        }
         var distance = x - tmp.startX;
         var maxdistance = tmp.width * config.width / 100;
         if(e.type === 'touchmove') {
           if(Math.abs(distance) < maxdistance &&
              Math.abs(x - tmp.lastX) > config.touchSensitivity &&
              Math.abs(distance) > config.touchStartSensitivity &&
-            ((distance >= 0 && tmp.currentNav === 'left') || 
-             (distance <= 0 && tmp.currentNav === 'right'))) {
+            ((distance > 0 && tmp.currentNav === 'left') || 
+             (distance < 0 && tmp.currentNav === 'right'))) {
             $(config.appSelector).css('transform', 'translateX(' + distance + 'px)');
             tmp.lastX = x;
           }
-        } else if(e.type === 'touchend') {
-          if(Math.abs(distance) < maxdistance / 2) {
+        } else if(e.type === 'touchend' && from === 'moving') {
+          if(Math.abs(distance) < maxdistance * config.threshold &&
+            ((distance < 0 && tmp.currentNav === 'left') || 
+             (distance > 0 && tmp.currentNav === 'right'))) {
             fsm.close();  
           } else {
             fsm.open();
+            tmp.startX = undefined;
+            tmp.lastX = undefined;
           }
+        } else if(e.type === 'touchend' && from === 'opened') {
+          fsm.open();
+          tmp.startX = undefined;
+          tmp.lastX = undefined;
         }
       };
 
