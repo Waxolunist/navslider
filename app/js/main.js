@@ -20,7 +20,7 @@ require(['nav-slide/navSlider'], function(NavSlider) {
     strategy: 'touch',
     time: 500,
     appSelector: '.ui-page',
-    touchSensitivity: 20
+    touchSensitivity: 10
   });
 
   var reinit = function() {

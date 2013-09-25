@@ -24,7 +24,9 @@ define(['jquery', 'jquery-mobile', 'underscore', 'javascript-state-machine'], fu
     
       var tmp = {
         startX: undefined,
-        currentNav: undefined
+        lastX: undefined,
+        currentNav: undefined,
+        multiplNavs: false
       };
 
       /* State callbacks */
@@ -87,6 +89,7 @@ define(['jquery', 'jquery-mobile', 'underscore', 'javascript-state-machine'], fu
       };
 
       var moveNav = function(event, from, to, e) {
+        /*
         console.log('moveNav: ' + fsm.current + ' - ' + e.type);
         var x = _getX(e);
         if(_.isUndefined(tmp.startX)) { 
@@ -121,6 +124,7 @@ define(['jquery', 'jquery-mobile', 'underscore', 'javascript-state-machine'], fu
           tmp.startX = undefined;
           tmp.lastX = undefined;
         }
+        */
       };
 
       var _openLeft = function() {
@@ -186,6 +190,7 @@ define(['jquery', 'jquery-mobile', 'underscore', 'javascript-state-machine'], fu
             $(window).on('swiperight.slider', $.proxy(fsm.close, fsm, 'right')); 
           }
         } else if(config.strategy === 'touch') {
+          $(window).on('touchstart.slider', $.proxy(fsm.move, fsm)); 
           $(window).on('touchmove.slider', $.proxy(fsm.move, fsm)); 
           $(window).on('touchend.slider', $.proxy(fsm.move, fsm)); 
         }
@@ -202,23 +207,20 @@ define(['jquery', 'jquery-mobile', 'underscore', 'javascript-state-machine'], fu
       /* FSM */
       var createFSM = function () {
         var fsm = StateMachine.create({
-          initial: { state: 'closed', event: 'init', defer: true },
+          initial: { state: 'initial', event: 'init', defer: true },
           error: function(eventName, from, to, args, errorCode, errorMessage) {
             return 'event ' + eventName + ' was naughty :- ' + errorMessage;
           },
           events: [
-            { name: 'prepare',  from: ['closed', 'prepared'], to: 'prepared' },
-            { name: 'move',     from: ['opened', 'prepared', 'moving'], to: 'moving' },
-            { name: 'open',     from: ['prepared', 'moving'], to: 'opened' },
-            { name: 'close',    from: ['opened', 'moving'],   to: 'closed' }
+            { name: 'prepare',  from: ['initial', 'closed'], to: 'closed' },
+            { name: 'open',     from: ['closed'], to: 'opened' },
+            { name: 'close',    from: ['opened'],   to: 'closed' }
           ],
           callbacks: {
             oninit: init,
             onprepare: prepareNav,
-            onmove: moveNav,
             onbeforeopen: openNav,
-            onbeforeclose: closeNav,
-            onafterclose: closeNav
+            onbeforeclose: closeNav
           }
         });
 
