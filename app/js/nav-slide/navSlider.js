@@ -55,7 +55,7 @@ define(['jquery', 'jquery-mobile', 'underscore', 'javascript-state-machine'], fu
 
       var resetTransform = function(event, from, to) {
         console.log('resetTransform: ' + fsm.current);
-        $(config.appSelector).css('transform', 'translateX(0)');
+        $(config.appSelector).css('transform', 'translate3d(0,0,0)');
       };
   
       var resetZIndex = function(event, from, to) {
@@ -128,11 +128,13 @@ define(['jquery', 'jquery-mobile', 'underscore', 'javascript-state-machine'], fu
       };
 
       var _openLeft = function() {
-        $(config.appSelector).css('transform', 'translateX(' + config.width + '%)');
+        var distance = $(window).width() * config.width / 100;
+        $(config.appSelector).css('transform', 'translate3d(' + distance + 'px,0,0)');
       };
 
       var _openRight = function() {
-        $(config.appSelector).css('transform', 'translateX(-' + config.width + '%)');
+        var distance = $(window).width() * config.width / 100;
+        $(config.appSelector).css('transform', 'translate3d(-' + distance + 'px,0,0)');
       };
 
       var openNav = function(event, from, to, dir, e) {
