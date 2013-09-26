@@ -79,25 +79,6 @@ define(['jquery', 'jquery-mobile', 'underscore', 'javascript-state-machine'], fu
         $('.' + config.navClass).css('z-index', 1);
       };
 
-      var preventXEventAction = function(e) {
-        var y = _getY(e);
-        var x = _getX(e);
-        if(e.type === 'touchstart') {
-          if(_.isUndefined(tmp.startX)) {
-            tmp.startX = x;
-          }
-          if(_.isUndefined(tmp.startY)) {
-            tmp.startY = y;
-          }
-        } else if(e.type === 'touchmove') {
-          if(Math.abs(y - tmp.startY) < Math.abs(x - tmp.startX)) {
-            e.preventDefault();
-            return false;
-          }
-        }
-        return true;
-      };
-
       var prepareNav = function(event, from, to, e) {
         if(from === 'closed') { 
           var x = _getX(e);   
