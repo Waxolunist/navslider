@@ -12,7 +12,6 @@
     <title>Slidemenu</title>
 
     <link rel="stylesheet" type="text/css" href="styles/main.css">
-    <script data-main="js/main" src="components/requirejs/require.js"></script>
   </head>
 
   <body>
@@ -50,23 +49,24 @@
         <section>
           <div data-role="fieldcontain">
             <label for="touchpixelratio" class="twoline">Touch pixel Ration:</label>
-            <input type="range" name="touchpixelratio" id="touchpixelratio" value="1.5" min="0.1" max="5" step="0.1" />
+            <input type="range" name="touchpixelratio" id="touchpixelratio" value="1" min="0.1" max="5" step="0.1" />
           </div>
         </section>
         <section>
           <div data-role="fieldcontain">
             <label for="time" class="twoline">Transitiontime:</label>
-            <input type="range" name="time" id="time" value="300" min="0" max="2000" step="50" />
+            <input type="range" name="time" id="time" value="150" min="0" max="1000" step="50" />
           </div>
         </section>
         <section>
           <div data-role="fieldcontain">
             <label for="touchsensitivity" class="twoline">Touch Sensitivity:</label>
-            <input type="range" name="touchsensitivity" id="touchsensitivity" value="5" min="0" max="50" step="1" />
+            <input type="range" name="touchsensitivity" id="touchsensitivity" value="30" min="0" max="50" step="1" />
           </div>
         </section>
       </div>
     </div>
     <script src="http://localhost:35729/livereload.js"></script>
+    <script data-main="js/main.min" src="components/requirejs/require.js"></script>
   </body>
 </html>

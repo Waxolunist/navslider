@@ -160,7 +160,13 @@ define(['jquery', 'jquery-mobile', 'underscore', 'javascript-state-machine'], fu
             if(fsm.current === 'closed') {
               fsm.open(undefined, e);
             } else {
-              fsm.close(undefined, e);
+              if(distance < 0 && tmp.currentNav === 'left') {
+                fsm.close(undefined, e);
+              } else if(distance > 0 && tmp.currentNav === 'right') {
+                fsm.close(undefined, e);
+              } else {
+                fsm.open(undefined, e);
+              }
             } 
           } else {
             if(fsm.current === 'opened') {
