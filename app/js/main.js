@@ -18,9 +18,10 @@ require.config({
 require(['nav-slide/navSlider'], function(NavSlider) {
   var navslider = new NavSlider({
     strategy: 'touch',
-    time: 500,
+    time: 300,
     appSelector: '.ui-page',
-    touchSensitivity: 10
+    touchSensitivity: 5,
+    touchPixelRatio: 1
   });
 
   var reinit = function() {
