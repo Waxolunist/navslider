@@ -139,7 +139,13 @@ define(['jquery', 'jquery-mobile', 'underscore', 'javascript-state-machine'], fu
         } else if(e.type === 'touchend') {
           if(Math.abs(distance / config.touchPixelRatio) > tmp.openwidth * config.threshold) {
             if(fsm.current === 'closed') {
-              fsm.open(undefined, e);
+              if(distance > 0 && tmp.currentNav === 'left') {
+                fsm.open(undefined, e);
+              } else if(distance < 0 && tmp.currentNav === 'right') {
+                fsm.open(undefined, e);
+              } else {
+                fsm.close(undefined, e);
+              }
             } else {
               if(distance < 0 && tmp.currentNav === 'left') {
                 fsm.close(undefined, e);
