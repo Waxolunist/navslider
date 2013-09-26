@@ -7,3 +7,5 @@ I saw a lot of sliding menus. None of them are fulfilling my requirements. So I 
 Follow this tutorial: [http://www.nitinh.com/2013/05/getting-started-with-grunt-bower/](http://www.nitinh.com/2013/05/getting-started-with-grunt-bower/)
 
 **LICENSE:** MIT
+
+**Demo**: [http://waxolunist.github.io/navslider](http://waxolunist.github.io/navslider)
