@@ -1,5 +1,14 @@
 .nav-slide
   background-color grey
   color white
+  &:after
+    content ""
+    background-color lighten(grey,10)
+    width 50%
+    height 100%
+    display block
+    position absolute
+    top 0
+    left 50%
   &.nav-slide-left
     background-color darken(grey,10)

@@ -1,5 +1,8 @@
 define(['jquery', 'jquery-mobile', 'underscore', 'javascript-state-machine'], function($, Mobile, _, StateMachine) {
   'use strict';
+
+  var console = window.console;
+
   var NavSlider = (function () {
 
     //private static
@@ -19,12 +22,21 @@ define(['jquery', 'jquery-mobile', 'underscore', 'javascript-state-machine'], fu
       return e.originalEvent.changedTouches[0].clientX;
     };
 
+    var _getY = function(e) {
+      return e.originalEvent.changedTouches[0].clientY;
+    };
+
+    var _boundaries = function(val, upper, lower) {
+      return Math.max(Math.min(val, upper), lower);
+    };
+
     var cls = function (config) {
       config = _.extend(_config, config);
       //TODO validate config
-    
+
       var tmp = {
         startX: undefined,
+        startY: undefined,
         lastX: undefined,
         currentNav: undefined,
         multiplNavs: false,
@@ -61,34 +73,54 @@ define(['jquery', 'jquery-mobile', 'underscore', 'javascript-state-machine'], fu
         console.log('resetTransform: ' + fsm.current);
         $(config.appSelector).css('transform', 'translate3d(0,0,0)');
       };
-  
+
       var resetZIndex = function(event, from, to) {
         console.log('resetZIndex: ' + fsm.current);
         $('.' + config.navClass).css('z-index', 1);
       };
 
-      var prepareNav = function(event, from, to, e) {
-        e.preventDefault();
-        var x = _getX(e);   
+      var preventXEventAction = function(e) {
+        var y = _getY(e);
+        var x = _getX(e);
         if(e.type === 'touchstart') {
-          console.log('prepareNav: ' + fsm.current);
-          tmp.startX = x;
-          tmp.lastX = x;
-          if(tmp.multiplNavs) {
-            tmp.currentNav = undefined;
-            resetZIndex();
+          if(_.isUndefined(tmp.startX)) {
+            tmp.startX = x;
           }
-        } else if (e.type === 'touchmove' && _.isUndefined(tmp.currentNav)) {
-          console.log('prepareNav: ' + fsm.current);
-          if(x < tmp.startX) {
+          if(_.isUndefined(tmp.startY)) {
+            tmp.startY = y;
+          }
+        } else if(e.type === 'touchmove') {
+          if(Math.abs(y - tmp.startY) < Math.abs(x - tmp.startX)) {
+            e.preventDefault();
+            return false;
+          }
+        }
+        return true;
+      };
+
+      var prepareNav = function(event, from, to, e) {
+        if(from === 'closed') { 
+          var x = _getX(e);   
+          if(e.type === 'touchstart') {
+            console.log('prepareNav: ' + fsm.current);
+            tmp.startX = x;
+            tmp.lastX = x;
             if(tmp.multiplNavs) {
-              tmp.currentNav = 'right'; 
-              $('.' + config.navClass + '-' + tmp.currentNav).css('z-index', 2);
+              tmp.currentNav = undefined;
+              resetZIndex();
             }
-          } else if(x > tmp.startX) {
-            if(tmp.multiplNavs) {
-              tmp.currentNav = 'left'; 
-              $('.' + config.navClass + '-' + tmp.currentNav).css('z-index', 2);
+          } else if (e.type === 'touchmove' && _.isUndefined(tmp.currentNav)) {
+            console.log('prepareNav: ' + fsm.current);
+            if(x < tmp.startX) {
+              if(tmp.multiplNavs) {
+                tmp.currentNav = 'right'; 
+                $('.' + config.navClass + '-' + tmp.currentNav).css('z-index', 2);
+              }
+            } else if(x > tmp.startX) {
+              if(tmp.multiplNavs) {
+                tmp.currentNav = 'left'; 
+                $('.' + config.navClass + '-' + tmp.currentNav).css('z-index', 2);
+              }
             }
           }
         }
@@ -96,7 +128,6 @@ define(['jquery', 'jquery-mobile', 'underscore', 'javascript-state-machine'], fu
 
       var moveNav = function(e) {
         console.log('moveNav: ' + fsm.current + ' - ' + e.type);
-        e.preventDefault();
         var x = _getX(e);
         var distance = x - (tmp.startX || 0);
         if(e.type === 'touchstart') {
@@ -104,58 +135,41 @@ define(['jquery', 'jquery-mobile', 'underscore', 'javascript-state-machine'], fu
         } else if(e.type === 'touchmove') {
           if(Math.abs(distance) > config.touchSensitivity &&
              Math.abs(x - tmp.lastX) > config.touchSensitivity) {
-            if(distance < 0 && ((tmp.currentNav === 'right' && fsm.current === 'closed') || (tmp.currentNav === 'left' && fsm.current === 'opened'))) {
-              $(config.appSelector).css('transform', 'translate3d(' + Math.min(Math.max(distance / config.touchPixelRatio, tmp.openwidth * -1), 0) + 'px,0,0)');
-            } else if(distance > 0 && ((tmp.currentNav === 'right' && fsm.current === 'opened') || (tmp.currentNav === 'left' && fsm.current === 'closed'))) {
-              $(config.appSelector).css('transform', 'translate3d(' + Math.max(Math.min(distance / config.touchPixelRatio, tmp.openwidth), 0) + 'px,0,0)');
+            var translatePx = 0;
+            if(fsm.current === 'opened') {
+              translatePx = _boundaries(Math.abs(tmp.openwidth - Math.abs(distance / config.touchPixelRatio)), tmp.openwidth, 0);  
+              if(distance > 0 && tmp.currentNav === 'right') {
+                $(config.appSelector).css('transform', 'translate3d(-' + translatePx + 'px,0,0)');
+              } else if(distance < 0 && tmp.currentNav === 'left') {
+                $(config.appSelector).css('transform', 'translate3d(' + translatePx + 'px,0,0)');
+              }
+            } else if(fsm.current === 'closed') {
+              translatePx = _boundaries(Math.abs(distance / config.touchPixelRatio), tmp.openwidth, 0);  
+              if(distance < 0 && tmp.currentNav === 'right') {
+                $(config.appSelector).css('transform', 'translate3d(-' + translatePx + 'px,0,0)');
+              } else if(distance > 0 && tmp.currentNav === 'left') {
+                $(config.appSelector).css('transform', 'translate3d(' + translatePx + 'px,0,0)');
+              }
             }
+
             tmp.lastX = x;
+            e.preventDefault();
           }
         } else if(e.type === 'touchend') {
-          if(Math.abs(distance) > tmp.width * config.threshold) {
+          if(Math.abs(distance / config.touchPixelRatio) > tmp.openwidth * config.threshold) {
             if(fsm.current === 'closed') {
               fsm.open(undefined, e);
+            } else {
+              fsm.close(undefined, e);
             } 
           } else {
-            fsm.close(undefined, e);
+            if(fsm.current === 'opened') {
+              fsm.open(undefined, e);
+            } else {
+              fsm.close(undefined, e);
+            } 
           }
         }
-        /*
-        console.log('moveNav: ' + fsm.current + ' - ' + e.type);
-        var x = _getX(e);
-        if(_.isUndefined(tmp.startX)) { 
-          tmp.startX = x; 
-        }
-        if(_.isUndefined(tmp.lastX)) { 
-          tmp.lastX = x; 
-        }
-        var distance = x - tmp.startX;
-        var maxdistance = tmp.width * config.width / 100;
-        if(e.type === 'touchmove') {
-          if(Math.abs(distance) < maxdistance &&
-             Math.abs(x - tmp.lastX) > config.touchSensitivity &&
-             Math.abs(distance) > config.touchStartSensitivity &&
-            ((distance > 0 && tmp.currentNav === 'left') || 
-             (distance < 0 && tmp.currentNav === 'right'))) {
-            $(config.appSelector).css('transform', 'translateX(' + distance + 'px)');
-            tmp.lastX = x;
-          }
-        } else if(e.type === 'touchend' && from === 'moving') {
-          if(Math.abs(distance) < maxdistance * config.threshold &&
-            ((distance < 0 && tmp.currentNav === 'left') || 
-             (distance > 0 && tmp.currentNav === 'right'))) {
-            fsm.close();  
-          } else {
-            fsm.open();
-            tmp.startX = undefined;
-            tmp.lastX = undefined;
-          }
-        } else if(e.type === 'touchend' && from === 'opened') {
-          fsm.open();
-          tmp.startX = undefined;
-          tmp.lastX = undefined;
-        }
-        */
       };
 
       var _openLeft = function() {
@@ -183,8 +197,10 @@ define(['jquery', 'jquery-mobile', 'underscore', 'javascript-state-machine'], fu
         } else if (config.strategy === 'touch') {
           if(tmp.currentNav === 'left') {
             _openLeft();
+            return true;
           } else if(tmp.currentNav === 'right') {
             _openRight();
+            return true;
           }  
         }
         return false;
@@ -209,6 +225,7 @@ define(['jquery', 'jquery-mobile', 'underscore', 'javascript-state-machine'], fu
       /* Init helper */
       var initStyles = function() {
         $('.' + config.navClass).width(config.width + '%');
+        $('.' + config.navClass).height($(config.appSelector).outerHeight());
         $(config.appSelector).css('transition-duration', config.time + 'ms');
       };
 
@@ -248,7 +265,7 @@ define(['jquery', 'jquery-mobile', 'underscore', 'javascript-state-machine'], fu
           },
           events: [
             { name: 'prepare',  from: ['initial', 'closed'], to: 'closed' },
-            { name: 'open',     from: ['closed'], to: 'opened' },
+            { name: 'open',     from: ['opened', 'closed'], to: 'opened' },
             { name: 'close',    from: ['opened', 'closed'],   to: 'closed' }
           ],
           callbacks: {

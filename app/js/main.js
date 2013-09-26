@@ -15,23 +15,27 @@ require.config({
   }
 });
 
-require(['nav-slide/navSlider'], function(NavSlider) {
+require(['nav-slide/navSlider', 'jquery', 'jquery-mobile'], function(NavSlider, $, jqm) {
+
   var navslider = new NavSlider({
     strategy: 'touch',
-    time: 300,
-    appSelector: '.ui-page',
+    time: 200,
+    appSelector: '#app',
     touchSensitivity: 5,
-    touchPixelRatio: 1
+    touchPixelRatio: 1.5
   });
 
   var reinit = function() {
     navslider.reinit({
-      strategy: $('#strategy').val()
+      strategy: $('#strategy').val(),
+      touchPixelRatio: $('#touchpixelratio').val(),
+      time: $('#time').val(),
+      touchSensitivity: $('#touchsensitivity').val()
     }); 
   };
 
   var addNav = function(dir) {
-    $('.ui-page').before('<nav class="nav-slide nav-slide-' + dir + '">' + dir + '</nav>'); 
+    $('#app').before('<nav class="nav-slide nav-slide-' + dir + '">' + dir + '</nav>'); 
   };
 
   $('#strategy').change(reinit);
@@ -50,6 +54,15 @@ require(['nav-slide/navSlider'], function(NavSlider) {
       addNav('left');
     }
     reinit();
+  });
+  $('#touchpixelratio').change(function(e) {
+    reinit(); 
+  });
+  $('#time').change(function(e) {
+    reinit(); 
+  });
+  $('#touchsensitivity').change(function(e) {
+    reinit(); 
   });
 
   addNav('left'); 

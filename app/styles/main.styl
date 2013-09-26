@@ -1,33 +1,8 @@
 @import "../components/normalize-css/normalize.css"
 @import "../components/jquery-mobile-bower/css/jquery.mobile-1.3.2.min.css"
 
-body
-html
 #app
-  height 100%
-  width 100%
-  min-width 100%
-  min-height 100%
-  max-width 100%
-  overflow-x hidden
-  overflow-y scroll
-  display block
-  margin 0
-  padding 0
-  -webkit-overflow-scrolling none
-
-body
-html
-#app
-.ui-page
-  background-color white
-
-.ui-page
-#app
-  position absolute
   z-index 3
-  top 0
-  left 0
   -webkit-transition-property -webkit-transform
   -webkit-backface-visibility hidden
   -webkit-perspective 1000
@@ -40,9 +15,17 @@ a
 
 #content
   padding 1em
-
-h1
-  font-size 1em
+  overflow-y scroll
+  -webkit-overflow-scrolling touch
+  label.ui-slider
+    float left
+    width 40%
+  label.twoline
+    float none
+  section:nth-child(even)
+    background-color darken(white,5)
+  h1
+    font-size 1em
 
 @import "nav-slide/nav-slide"
 @import "nav-slide/demo-theme"
